@@ -8,13 +8,15 @@
 #include "consensus/consensus.h"
 #include "consensus/validation.h"
 #include "core_io.h"
-#include "crypto/equihash.h"
 #include "init.h"
 #include "main.h"
 #include "metrics.h"
 #include "miner.h"
 #include "net.h"
 #include "pow.h"
+#if defined(ENABLE_WALLET) && defined(ENABLE_MINING)
+#include "pow/str4d/equihash.h"
+#endif
 #include "rpcserver.h"
 #include "util.h"
 #include "validationinterface.h"

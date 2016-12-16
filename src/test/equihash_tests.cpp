@@ -10,6 +10,9 @@
 #include "arith_uint256.h"
 #include "crypto/sha256.h"
 #include "crypto/equihash.h"
+#ifdef ENABLE_MINING
+#include "pow/str4d/equihash.h"
+#endif
 #include "test/test_bitcoin.h"
 #include "uint256.h"
 

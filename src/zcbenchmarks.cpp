@@ -8,12 +8,14 @@
 #include "init.h"
 #include "primitives/transaction.h"
 #include "base58.h"
-#include "crypto/equihash.h"
 #include "chainparams.h"
 #include "consensus/validation.h"
 #include "main.h"
 #include "miner.h"
 #include "pow.h"
+#ifdef ENABLE_MINING
+#include "pow/str4d/equihash.h"
+#endif
 #include "script/sign.h"
 #include "sodium.h"
 #include "streams.h"

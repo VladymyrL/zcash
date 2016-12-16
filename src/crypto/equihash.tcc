@@ -6,6 +6,17 @@
 #include <algorithm>
 #include <cassert>
 
+template<size_t WIDTH>
+bool HasCollision(StepRow<WIDTH>& a, StepRow<WIDTH>& b, int l)
+{
+    // This doesn't need to be constant time.
+    for (int j = 0; j < l; j++) {
+        if (a.hash[j] != b.hash[j])
+            return false;
+    }
+    return true;
+}
+
 // Checks if the intersection of a.indices and b.indices is empty
 template<size_t WIDTH>
 bool DistinctIndices(const FullStepRow<WIDTH>& a, const FullStepRow<WIDTH>& b, size_t len, size_t lenIndices)
@@ -18,28 +29,6 @@ bool DistinctIndices(const FullStepRow<WIDTH>& a, const FullStepRow<WIDTH>& b, s
         }
     }
     return true;
-}
-
-template<size_t MAX_INDICES>
-bool IsProbablyDuplicate(std::shared_ptr<eh_trunc> indices, size_t lenIndices)
-{
-    assert(lenIndices <= MAX_INDICES);
-    bool checked_index[MAX_INDICES] = {false};
-    int count_checked = 0;
-    for (int z = 0; z < lenIndices; z++) {
-        // Skip over indices we have already paired
-        if (!checked_index[z]) {
-            for (int y = z+1; y < lenIndices; y++) {
-                if (!checked_index[y] && indices.get()[z] == indices.get()[y]) {
-                    // Pair found
-                    checked_index[y] = true;
-                    count_checked += 2;
-                    break;
-                }
-            }
-        }
-    }
-    return count_checked == lenIndices;
 }
 
 template<size_t WIDTH>

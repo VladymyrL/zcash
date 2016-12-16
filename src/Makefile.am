@@ -268,6 +268,10 @@ crypto_libbitcoin_crypto_a_SOURCES = \
   crypto/sha512.h
 
 if ENABLE_MINING
+EQUIHASH_STR4D_SOURCES = \
+  pow/str4d/equihash.cpp \
+  pow/str4d/equihash.h
+
 EQUIHASH_TROMP_SOURCES = \
   pow/tromp/equi_miner.h \
   pow/tromp/equi.h \
@@ -276,6 +280,7 @@ EQUIHASH_TROMP_SOURCES = \
 crypto_libbitcoin_crypto_a_CPPFLAGS += \
   -DEQUIHASH_TROMP_ATOMIC
 crypto_libbitcoin_crypto_a_SOURCES += \
+  ${EQUIHASH_STR4D_SOURCES} \
   ${EQUIHASH_TROMP_SOURCES}
 endif
 

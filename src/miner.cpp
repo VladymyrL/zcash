@@ -5,6 +5,7 @@
 
 #include "miner.h"
 #if defined(ENABLE_WALLET) && defined(ENABLE_MINING)
+#include "pow/str4d/equihash.h"
 #include "pow/tromp/equi_miner.h"
 #endif
 
@@ -23,9 +24,6 @@
 #include "util.h"
 #include "utilmoneystr.h"
 #ifdef ENABLE_WALLET
- #ifdef ENABLE_MINING
-#include "crypto/equihash.h"
- #endif
 #include "wallet/wallet.h"
 #include <functional>
 #endif

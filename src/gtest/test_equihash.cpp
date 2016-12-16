@@ -6,6 +6,9 @@
 #include <gmock/gmock.h>
 
 #include "crypto/equihash.h"
+#ifdef ENABLE_MINING
+#include "pow/str4d/equihash.h"
+#endif
 #include "uint256.h"
 
 void TestExpandAndCompress(const std::string &scope, size_t bit_len, size_t byte_pad,
@@ -70,6 +73,7 @@ TEST(equihash_tests, minimal_solution_representation) {
                         ParseHex("000220000a7ffffe004d10014c800ffc00002fffff"));
 }
 
+#ifdef ENABLE_MINING
 TEST(equihash_tests, is_probably_duplicate) {
     std::shared_ptr<eh_trunc> p1 (new eh_trunc[4] {0, 1, 2, 3}, std::default_delete<eh_trunc[]>());
     std::shared_ptr<eh_trunc> p2 (new eh_trunc[4] {0, 1, 1, 3}, std::default_delete<eh_trunc[]>());
@@ -80,9 +84,8 @@ TEST(equihash_tests, is_probably_duplicate) {
     ASSERT_TRUE(IsProbablyDuplicate<4>(p3, 4));
 }
 
-#ifdef ENABLE_MINING
 TEST(equihash_tests, check_basic_solver_cancelled) {
-    Equihash<48,5> Eh48_5;
+    EquihashSolver<48,5> Eh48_5;
     crypto_generichash_blake2b_state state;
     Eh48_5.InitialiseState(state);
     uint256 V = uint256S("0x00");
@@ -186,7 +189,7 @@ TEST(equihash_tests, check_basic_solver_cancelled) {
 }
 
 TEST(equihash_tests, check_optimised_solver_cancelled) {
-    Equihash<48,5> Eh48_5;
+    EquihashSolver<48,5> Eh48_5;
     crypto_generichash_blake2b_state state;
     Eh48_5.InitialiseState(state);
     uint256 V = uint256S("0x00");
