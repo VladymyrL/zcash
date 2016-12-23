@@ -14,7 +14,7 @@
 #include "miner.h"
 #include "net.h"
 #include "pow.h"
-#if defined(ENABLE_WALLET) && defined(ENABLE_MINING)
+#ifdef ENABLE_MINING
 #include "pow/str4d/equihash.h"
 #endif
 #include "rpcserver.h"
@@ -139,7 +139,7 @@ Value getnetworkhashps(const Array& params, bool fHelp)
     return GetNetworkHashPS(params.size() > 0 ? params[0].get_int() : 120, params.size() > 1 ? params[1].get_int() : -1);
 }
 
-#if defined(ENABLE_WALLET) && defined(ENABLE_MINING)
+#ifdef ENABLE_MINING
 Value getgenerate(const Array& params, bool fHelp)
 {
     if (fHelp || params.size() != 0)
@@ -175,8 +175,10 @@ Value generate(const Array& params, bool fHelp)
             + HelpExampleCli("generate", "11")
         );
 
+#ifdef ENABLE_WALLET
     if (pwalletMain == NULL)
         throw JSONRPCError(RPC_METHOD_NOT_FOUND, "Method not found (disabled)");
+#endif
     if (!Params().MineBlocksOnDemand())
         throw JSONRPCError(RPC_METHOD_NOT_FOUND, "This method can only be used on regtest");
 
@@ -184,7 +186,9 @@ Value generate(const Array& params, bool fHelp)
     int nHeightEnd = 0;
     int nHeight = 0;
     int nGenerate = params[0].get_int();
+#ifdef ENABLE_WALLET
     CReserveKey reservekey(pwalletMain);
+#endif
 
     {   // Don't keep cs_main locked
         LOCK(cs_main);
@@ -198,7 +202,11 @@ Value generate(const Array& params, bool fHelp)
     unsigned int k = Params().EquihashK();
     while (nHeight < nHeightEnd)
     {
+#ifdef ENABLE_WALLET
         unique_ptr<CBlockTemplate> pblocktemplate(CreateNewBlockWithKey(reservekey));
+#else
+        unique_ptr<CBlockTemplate> pblocktemplate(CreateNewBlockWithKey());
+#endif
         if (!pblocktemplate.get())
             throw JSONRPCError(RPC_INTERNAL_ERROR, "Wallet keypool empty");
         CBlock *pblock = &pblocktemplate->block;
@@ -277,8 +285,10 @@ Value setgenerate(const Array& params, bool fHelp)
             + HelpExampleRpc("setgenerate", "true, 1")
         );
 
+#ifdef ENABLE_WALLET
     if (pwalletMain == NULL)
         throw JSONRPCError(RPC_METHOD_NOT_FOUND, "Method not found (disabled)");
+#endif
     if (Params().MineBlocksOnDemand())
         throw JSONRPCError(RPC_METHOD_NOT_FOUND, "Use the generate method instead of setgenerate on this network");
 
@@ -296,7 +306,11 @@ Value setgenerate(const Array& params, bool fHelp)
 
     mapArgs["-gen"] = (fGenerate ? "1" : "0");
     mapArgs ["-genproclimit"] = itostr(nGenProcLimit);
+#ifdef ENABLE_WALLET
     GenerateBitcoins(fGenerate, pwalletMain, nGenProcLimit);
+#else
+    GenerateBitcoins(fGenerate, nGenProcLimit);
+#endif
 
     return Value::null;
 }
@@ -345,7 +359,7 @@ Value getmininginfo(const Array& params, bool fHelp)
     obj.push_back(Pair("pooledtx",         (uint64_t)mempool.size()));
     obj.push_back(Pair("testnet",          Params().TestnetToBeDeprecatedFieldRPC()));
     obj.push_back(Pair("chain",            Params().NetworkIDString()));
-#if defined(ENABLE_WALLET) && defined(ENABLE_MINING)
+#ifdef ENABLE_MINING
     obj.push_back(Pair("generate",         getgenerate(params, false)));
 #endif
     return obj;
@@ -467,10 +481,12 @@ Value getblocktemplate(const Array& params, bool fHelp)
 
     LOCK(cs_main);
 
+#ifdef ENABLE_WALLET
     // Wallet is required because we support coinbasetxn
     if (pwalletMain == NULL) {
         throw JSONRPCError(RPC_METHOD_NOT_FOUND, "Method not found (disabled)");
     }
+#endif
 
     std::string strMode = "template";
     Value lpval = Value::null;
@@ -599,8 +615,12 @@ Value getblocktemplate(const Array& params, bool fHelp)
             delete pblocktemplate;
             pblocktemplate = NULL;
         }
+#ifdef ENABLE_WALLET
         CReserveKey reservekey(pwalletMain);
         pblocktemplate = CreateNewBlockWithKey(reservekey);
+#else
+        pblocktemplate = CreateNewBlockWithKey();
+#endif
         if (!pblocktemplate)
             throw JSONRPCError(RPC_OUT_OF_MEMORY, "Out of memory");
 

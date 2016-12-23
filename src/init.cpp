@@ -163,8 +163,12 @@ void Shutdown()
 #ifdef ENABLE_WALLET
     if (pwalletMain)
         pwalletMain->Flush(false);
- #ifdef ENABLE_MINING
+#endif
+#ifdef ENABLE_MINING
+ #ifdef ENABLE_WALLET
     GenerateBitcoins(false, NULL, 0);
+ #else
+    GenerateBitcoins(false, 0);
  #endif
 #endif
     StopNode();
@@ -1502,10 +1506,14 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
                                          boost::ref(cs_main), boost::cref(pindexBestHeader), nPowTargetSpacing);
     scheduler.scheduleEvery(f, nPowTargetSpacing);
 
-#if defined(ENABLE_WALLET) && defined(ENABLE_MINING)
+#ifdef ENABLE_MINING
     // Generate coins in the background
-    if (pwalletMain)
+ #ifdef ENABLE_WALLET
+    if (pwalletMain || !GetArg("-mineraddress", "").empty())
         GenerateBitcoins(GetBoolArg("-gen", false), pwalletMain, GetArg("-genproclimit", 1));
+ #else
+    GenerateBitcoins(GetBoolArg("-gen", false), GetArg("-genproclimit", 1));
+ #endif
 #endif
 
     // ********************************************************* Step 11: finished

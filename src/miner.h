@@ -11,9 +11,11 @@
 #include <stdint.h>
 
 class CBlockIndex;
-class CReserveKey;
 class CScript;
+#ifdef ENABLE_WALLET
+class CReserveKey;
 class CWallet;
+#endif
 namespace Consensus { struct Params; };
 
 struct CBlockTemplate
@@ -24,10 +26,18 @@ struct CBlockTemplate
 };
 
 /** Run the miner threads */
+#ifdef ENABLE_WALLET
 void GenerateBitcoins(bool fGenerate, CWallet* pwallet, int nThreads);
+#else
+void GenerateBitcoins(bool fGenerate, int nThreads);
+#endif
 /** Generate a new block, without valid proof-of-work */
 CBlockTemplate* CreateNewBlock(const CScript& scriptPubKeyIn);
+#ifdef ENABLE_WALLET
 CBlockTemplate* CreateNewBlockWithKey(CReserveKey& reservekey);
+#else
+CBlockTemplate* CreateNewBlockWithKey();
+#endif
 /** Modify the extranonce in a block */
 void IncrementExtraNonce(CBlock* pblock, CBlockIndex* pindexPrev, unsigned int& nExtraNonce);
 void UpdateTime(CBlockHeader* pblock, const Consensus::Params& consensusParams, const CBlockIndex* pindexPrev);
