@@ -11,17 +11,17 @@
 #include "primitives/transaction.h"
 #include "zcash/JoinSplit.hpp"
 #include "zcash/Address.hpp"
-#include "json/json_spirit_value.h"
 #include "wallet.h"
 
 #include <unordered_map>
 #include <tuple>
 
+#include "univalue/univalue.h"
+
 // Default transaction fee if caller does not specify one.
 #define ASYNC_RPC_OPERATION_DEFAULT_MINERS_FEE   10000
 
 using namespace libzcash;
-using namespace json_spirit;
 
 // A recipient is a tuple of address, amount, memo (optional if zaddr)
 typedef std::tuple<std::string, CAmount, std::string> SendManyRecipient;
@@ -96,18 +96,18 @@ private:
     bool main_impl();
 
     // JoinSplit without any input notes to spend
-    Object perform_joinsplit(AsyncJoinSplitInfo &);
+    UniValue perform_joinsplit(AsyncJoinSplitInfo &);
 
     // JoinSplit with input notes to spend (JSOutPoints))
-    Object perform_joinsplit(AsyncJoinSplitInfo &, std::vector<JSOutPoint> & );
+    UniValue perform_joinsplit(AsyncJoinSplitInfo &, std::vector<JSOutPoint> & );
 
     // JoinSplit where you have the witnesses and anchor
-    Object perform_joinsplit(
+    UniValue perform_joinsplit(
         AsyncJoinSplitInfo & info,
         std::vector<boost::optional < ZCIncrementalWitness>> witnesses,
         uint256 anchor);
 
-    void sign_send_raw_transaction(Object obj);     // throws exception if there was an error
+    void sign_send_raw_transaction(UniValue obj);     // throws exception if there was an error
 
 };
 
@@ -153,15 +153,15 @@ public:
         return delegate->main_impl();
     }
 
-    Object perform_joinsplit(AsyncJoinSplitInfo &info) {
+    UniValue perform_joinsplit(AsyncJoinSplitInfo &info) {
         return delegate->perform_joinsplit(info);
     }
 
-    Object perform_joinsplit(AsyncJoinSplitInfo &info, std::vector<JSOutPoint> &v ) {
+    UniValue perform_joinsplit(AsyncJoinSplitInfo &info, std::vector<JSOutPoint> &v ) {
         return delegate->perform_joinsplit(info, v);
     }
 
-    Object perform_joinsplit(
+    UniValue perform_joinsplit(
         AsyncJoinSplitInfo & info,
         std::vector<boost::optional < ZCIncrementalWitness>> witnesses,
         uint256 anchor)
@@ -169,7 +169,7 @@ public:
         return delegate->perform_joinsplit(info, witnesses, anchor);
     }
 
-    void sign_send_raw_transaction(Object obj) {
+    void sign_send_raw_transaction(UniValue obj) {
         delegate->sign_send_raw_transaction(obj);
     }
     
